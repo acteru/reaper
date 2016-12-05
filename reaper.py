@@ -3,32 +3,35 @@ import subprocess
 import sys
 import yum
 
-def get_platform():
+def check_platform(repo_path):
+    repo_path = repo_path
     os = platform.linux_distribution()
-    if "Fedora" in os:
+    if "Fedora" in os[0]:
         set_packagemanager = "dnf"
+        set_repo_path = ( "%s/fedora/%s/" % repo_path, os[1] ) 
     elif "Centos" in os:
         set_packagemanager = "yum"
+        if "7" in os[0]:
+            set_repo_path = ( "'%s'/centos/'%s'/" % repo_path, os[1] )
+        else:
+            set_repo_path = ( "'%s'/centos/'%s'/" % repo_path, os[1] )
     else:
         sys.exit()
-    return(set_packagemanager)
+    return(set_packagemanager,set_repo_path)
 
-def get_repoid(packagemanager):
-    manager_cmd = ("%s repolist | awk '/repo id/{y=1;next}y' | awk '{print $1'}" % packagemanager)
-    repolist = subprocess.check_output(manager_cmd , shell=True)
-    repolist = repolist.split('\n')
-#    if 'repolist:' in repolist: repolist.remove('repolist:')
-    print repolist
-#    if "/" in repolist: 
-#        for i in repolist:
-#            m = i.index('/')
-#            l = i[:m]
-#            print l
-#    else:
-#        print repolist
+def sync_repos(packagemanager):
+    if packagemanager == 'dnf':
+        sync_repos_cmd = ( "dnf reposync -p '%s'" % repo_path )
+        sync = subprocess.check_output(sync_repos_cmd, shell=True)
+    else:
+        sync_repos_cmd = ("reposync -p '%s'" % repo_path) 
+        subprocess.check_output(sync_repos_cmd, shell=True)
 
 def main():
-    packagemanager = (get_platform())
-    get_repoid(packagemanager)
+    repo_path = '/var/repo/'
+    packagemanager = (check_platform(repo_path))
+    print packagemanager[0]
+    print packagemanager[1]
+    #sync_repos(packagemanager)
 
 main()
