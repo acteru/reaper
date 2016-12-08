@@ -1,0 +1,12 @@
+---
+#
+## reaper - config
+#
+#set value 'client' or 'master'
+# - client: gets external repositories from websources
+# - server: provides synced repositories to local clients
+role: 'client'
+
+# define your prefered path to where your packages are stored after a sync
+# example: '/var/repo' '/home/<myuser>/mylocalrepo'
+repo_path: '/var/repo'
