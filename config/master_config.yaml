@@ -1,0 +1,17 @@
+---
+## clients ##
+# List of used repo-clients to sync from
+clients:
+  - '10.0.0.1'
+  - 'client.example.com'
+
+# Add paths where the client store his repostitories
+client_repo_paths:
+  - '/var/repo'
+  - '/data/repo'
+
+## Server ##
+# instances needed on the master-server
+master_instances:
+  - 'production'
+  - 'testing'

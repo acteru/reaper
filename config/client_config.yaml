@@ -1,0 +1,5 @@
+---
+## client config ##
+# define your prefered path to where your packages are stored after a sync
+# example: '/var/repo' '/home/<myuser>/mylocalrepo'
+repo_path: '/var/repo'
