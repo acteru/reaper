@@ -1,0 +1,17 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.configure("2") do |config|
+  # set defaults for the VM
+  config.vm.provider :libvirt do |domain|
+    domain.memory = "1024M"
+    domain.nested = true
+    domain.cpus = 2
+  end
+  config.vm.box = "centos/7"
+  config.vm.hostname = "reaper-master"
+  # storage configuration
+  # Add second disk with 10G to the box
+  config.vm.provider :libvirt do |libvirt|
+    libvirt.storage :file, :size => '10G', :type => 'raw'
+  end
+end
