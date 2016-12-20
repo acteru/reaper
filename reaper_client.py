@@ -29,6 +29,9 @@ def check_platform(repo_path):
     elif "Centos" in os[0]:
         packagemanager = "yum"
         repo_path = ("%s/centos/%s" % (repo_path, os[1]))
+    elif "CentOS Linux" in os[0]:
+        packagemanager = "yum"
+        repo_path = ("%s/centos/%s" % (repo_path, os[1]))
     elif "RedHat" in os[0]:
         packagemanager = "yum"
         repo_path = ("%s/redhat/%s" % (repo_path, os[1]))
