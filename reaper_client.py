@@ -21,8 +21,10 @@ def load_config():
 
 class RepoSync():
 
+
     def __init__(self,repo_path):
         self.repo_path = repo_path
+
 
     def check_platform(self,repo_path):
         repo_path = repo_path
@@ -40,6 +42,7 @@ class RepoSync():
             packagemanager = "yum"
             repo_path = ("%s/redhat/%s" % (repo_path, os[1]))
         else:
+            print ("Your Operatingsystem is not supported please use CentOS, RHEL or Fedora")
             sys.exit()
         return(packagemanager,repo_path)
 
@@ -60,7 +63,7 @@ class RepoSync():
         else:
             sync_repos_cmd = ("reposync -p %s" % (repo_path))
             print sync_repos_cmd
-            subprocess.check_output(sync_repos_cmd, shell=True)
+
 
 if __name__ == "__main__":
     repo_path = load_config()['repo_path']

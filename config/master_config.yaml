@@ -12,6 +12,9 @@ client_repo_paths:
 
 ## Server ##
 # instances needed on the master-server
-master_instances:
+instances:
   - 'production'
   - 'testing'
+
+# Webserver: apache or nginx
+webserver: apache
