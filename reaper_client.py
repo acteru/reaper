@@ -10,14 +10,14 @@ import yaml
 
 sys.tracebacklimit = 0
 
-
-def load_config():
-    with open('config/client_config.yaml', 'r') as config_load:
-        try:
-            loaded_config = yaml.load(config_load)
-            return loaded_config
-        except yaml.YAMLError as exc:
-            print exc
+class Config():
+    def load_config(self):
+        with open('config/client_config.yaml', 'r') as config_load:
+            try:
+                loaded_config = yaml.load(config_load)
+                return loaded_config
+            except yaml.YAMLError as exc:
+                print exc
 
 class RepoSync():
 
@@ -63,10 +63,12 @@ class RepoSync():
         else:
             sync_repos_cmd = ("reposync -p %s" % (repo_path))
             print sync_repos_cmd
+            subprocess.check_output(sync_repos_cmd, shell=True)
 
 
 if __name__ == "__main__":
-    repo_path = load_config()['repo_path']
+    config = Config()
+    repo_path = config.load_config()['repo_path']
     reposync = RepoSync(repo_path)
     pathpackage = reposync.check_platform(repo_path)
     reposync.create_repo_dir(pathpackage[1])
