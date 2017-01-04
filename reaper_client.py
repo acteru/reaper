@@ -31,16 +31,16 @@ class RepoSync():
         os = platform.linux_distribution()
         if "Fedora" in os[0]:
             packagemanager = "dnf"
-            repo_path = ("%s/fedora/%s" % (repo_path, os[1]))
+            repo_path = ("%s/fedora" % (repo_path))
         elif "CentOS" in os[0]:
             packagemanager = "yum"
-            repo_path = ("%s/centos/%s" % (repo_path, os[1]))
+            repo_path = ("%s/centos" % (repo_path))
         elif "CentOS Linux" in os[0]:
             packagemanager = "yum"
-            repo_path = ("%s/centos/%s" % (repo_path, os[1]))
+            repo_path = ("%s/centos" % (repo_path))
         elif "RedHat" in os[0]:
             packagemanager = "yum"
-            repo_path = ("%s/redhat/%s" % (repo_path, os[1]))
+            repo_path = ("%s/redhat" % (repo_path))
         else:
             print ("Your Operatingsystem is not supported please use CentOS, RHEL or Fedora")
             sys.exit()

@@ -54,17 +54,17 @@ class reaper:
 
 
     # sync repository or repositories
-    def sync_client(self,loaded_config):
-        syncClient = "rsync copy and mirror "
+    def sync_client(self,client,client_path):
+        rsync_cmd = "rsync -a reaper@%s:%s" % (client,client_path)
         try:
-            subprocess.check()
+            subprocess.check_output(rsync_cmd, shell=True)
         except:
             print ("rsync not found --try yum install rsync")
 
 
     # sync all clients --default behavior
-    def sync_all_clients(self):
-        for i in reaper.clients:
+    def sync_all_clients(self,loaded_config):
+        for i in loaded_config['clients']:
             print i
 
 
@@ -79,6 +79,15 @@ class reaper:
         except OSError as exception:
             if exception.errno != errno.EEXIST:
                 raise
+
+
+    # create user for reaper
+    def create_user(self):
+        try:
+            useradd = "useradd reaper"
+            subprocess.check_output(useradd, shell=True)
+        except:
+            print "wip"
 
     # load config
     def load_config(self):
