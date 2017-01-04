@@ -6,31 +6,18 @@ import sys
 import subprocess
 import errno
 import platform
-
-from optparse import OptionParser
-
+import argparse
 
 class reaper:
 
 
     def parse_commands(self):
-        parser = OptionParser(usage="usage: %prog [options] repository",
-                              version="%prog 1.0")
-        parser.add_option("-s","--status",
-                          help="show current repository state")
-        parser.add_option("-X","--sync",
-                          help="syncs all clients to master")
-        parser.add_option("-b","--background",
-                          help="runs reaper in background")
-        parser.add_option("-i","--add-instance",
-                          help="add's new mastere instance")
-        (option,args) = parser.parse_args()
-
-        if len(args) != 1:
-            parser.error("wrong number of arguments")
-        print option
-        print args
-
+        parser = argparse.ArgumentParser(prog=sys.argv[0])
+        parser.add_argument('-s','--status',help="show current repository state")
+        parser.add_argument('-x','--sync',help="syncs all clients to master")
+        parser.add_argument('-b','--background',help="runs reaper in background")
+        parser.add_argument('-i','--add-instance',help="add's new mastere instance")
+        args = parser.parse_args()
 
     def check_platform(self):
         os = platform.linux_distribution()
@@ -55,7 +42,7 @@ class reaper:
 
     # sync repository or repositories
     def sync_client(self,client,client_path):
-        rsync_cmd = "rsync -a reaper@%s:%s" % (client,client_path)
+        rsync_cmd = "rsync -az reaper@%s:%s" % (client,client_path)
         try:
             subprocess.check_output(rsync_cmd, shell=True)
         except:
@@ -64,8 +51,8 @@ class reaper:
 
     # sync all clients --default behavior
     def sync_all_clients(self,loaded_config):
-        for i in loaded_config['clients']:
-            print i
+        for i in loaded_config['sources']:
+            reaper.sync_client(i,loaded_config['sources'][i]['path'])
 
 
     def add_instance(self):
@@ -102,7 +89,7 @@ class reaper:
 if __name__ == "__main__":
     try:
         reaper = reaper()
-        (option,args) = reaper.parse_commands()
+        reaper.sync_all_clients(reaper.load_config())
 
     except KeyboardInterrupt:
         sys.exit(0)

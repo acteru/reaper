@@ -1,15 +1,13 @@
 ---
 ## clients ##
 # List of used repo-clients to sync from
-clients:
-  - '10.0.0.1'
-  - 'client.example.com'
-
-# Add paths where the client store his repostitories
-client_repo_paths:
-  - '/var/repo'
-  - '/data/repo'
-
+sources:
+  '10.0.0.1':
+     user: 'reaper'
+     path: '/var/repo'
+  '10.1.0.1':
+     user: 'reaper'
+     path: '/var/repo2'
 ## Server ##
 # instances needed on the master-server
 instances:
