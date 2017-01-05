@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import yaml
+import yum
 import os
 import sys
 import subprocess
@@ -18,6 +19,26 @@ class reaper:
         parser.add_argument('-b','--background',help="runs reaper in background")
         parser.add_argument('-i','--add-instance',help="add's new mastere instance")
         args = parser.parse_args()
+
+
+    def check_installed_packages(self):
+        yb = yum.YumBase()
+        prereqs = list("httpd","createrepo","rsync")
+        missing_packages = set()
+        for package in prereqs:
+            print "Checking for required package: %s" % (package)
+            res = yb.rpmdb.searchNevra(name=package)
+            if res:
+                for pkg in res:
+                    print pkg, "installed!"
+            else:
+                try:
+                    print "trying to install missing package: %s" % (package)
+                    yb.install(name=package)
+                except:
+                    print >> sys.stderr, "Failed during install of %s package!" % (package)
+                    sys.exit(1)
+
 
     def check_platform(self):
         os = platform.linux_distribution()
@@ -41,8 +62,8 @@ class reaper:
 
 
     # sync repository or repositories
-    def sync_client(self,client,client_path):
-        rsync_cmd = "rsync -az reaper@%s:%s" % (client,client_path)
+    def sync_client(self,con_user,client,client_path,master_repo):
+        rsync_cmd = "rsync -az %s@%s:%s %s" % (con_user,client,client_path,master_repo)
         try:
             subprocess.check_output(rsync_cmd, shell=True)
         except:
@@ -51,8 +72,21 @@ class reaper:
 
     # sync all clients --default behavior
     def sync_all_clients(self,loaded_config):
-        for i in loaded_config['sources']:
-            reaper.sync_client(i,loaded_config['sources'][i]['path'])
+        for client in loaded_config['sources']:
+            path = loaded_config['sources'][client]['path']
+            master_repo = loaded_config['master_repo']
+            con_user = loaded_config['sources'][client]['user']
+            reaper.sync_client(con_user,client,path,master_repo,)
+
+
+    def create_metadata(self,master_repo):
+        repo_path = os.listdir(master_repo)
+        try:
+            for i in repo_path:
+                cmd_createrepo = "createrepo %s" % (i)
+                subprocess.check_output(cmd_createrepo, shell=True)
+        except:
+            print ("metadata creation failed")
 
 
     def add_instance(self):
@@ -76,6 +110,7 @@ class reaper:
         except:
             print "wip"
 
+
     # load config
     def load_config(self):
         with open('config/master_config.yaml', 'r') as config_load:
@@ -89,7 +124,10 @@ class reaper:
 if __name__ == "__main__":
     try:
         reaper = reaper()
-        reaper.sync_all_clients(reaper.load_config())
+        reaper.check_installed_packages()
+        config = reaper.load_config()
+        reaper.sync_all_clients(config)
+        reaper.create_metadata(config)
 
     except KeyboardInterrupt:
         sys.exit(0)

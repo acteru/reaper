@@ -4,11 +4,14 @@
 sources:
   '10.0.0.1':
      user: 'reaper'
-     path: '/var/repo'
+     path: '/var/repo/'
   '10.1.0.1':
      user: 'reaper'
-     path: '/var/repo2'
-## Server ##
+     path: '/var/repo2/'
+
+# set folder where the packages on the master sould reside
+master_repo: '/var/repo/latest'
+
 # instances needed on the master-server
 instances:
   - 'production'
