@@ -23,7 +23,7 @@ class reaper:
 
     def check_installed_packages(self):
         yb = yum.YumBase()
-        prereqs = list("httpd","createrepo","rsync")
+        prereqs = ["httpd","createrepo","rsync"]
         missing_packages = set()
         for package in prereqs:
             print "Checking for required package: %s" % (package)
