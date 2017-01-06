@@ -119,7 +119,8 @@ class reaper:
                 cmd_redhat_release = "scp %s@%s:/etc/redhat-release /dev/stdout" % (client,con_user)
                 redhat_release = subprocess.check_output(cmd_redhat_release, shell=True)
                 os_version = redhat_release.split(" ", 1)
-                return os_version[3]
+                os_version = os_version[3].lower()
+                return os_version
             except:
                 print "client arch/release not found"
                 sys.exit(0)
