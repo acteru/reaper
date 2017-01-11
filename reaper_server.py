@@ -114,6 +114,7 @@ class config_load:
             except yaml.YAMLError as exc:
                 print exc
 
+
     # discover major/minor version of the clients
     def client_meta(self, client_addresses, con_user):
         for client in client_addresses:
@@ -142,7 +143,7 @@ class config_load:
         os = platform.linux_distribution()
         if "Fedora" in os[0]:
             packagemanager = "dnf"
-        elif os[0] in "CentOS" or "CentOS Linux" or "RedHat":
+        elif os[0] in "CentOS" or "CentOS Linux" or "RedHat" or "Red Hat Enterprise Linux Server":
             packagemanager = "yum"
         else:
             print ("Your Operatingsystem is not supported please use CentOS, RHEL or Fedora")
