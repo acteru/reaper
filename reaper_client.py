@@ -6,6 +6,7 @@ import sys
 import os
 import errno
 import yaml
+import yum
 
 
 sys.tracebacklimit = 0
@@ -26,21 +27,19 @@ class RepoSync():
         self.repo_path = repo_path
 
 
+    # check os
     def check_platform(self,repo_path):
         repo_path = repo_path
         os = platform.linux_distribution()
         if "Fedora" in os[0]:
             packagemanager = "dnf"
-            repo_path = ("%s/fedora/%s/x86_64" % (repo_path,os[1]))
-        elif "CentOS" in os[0]:
+            repo_path = ("%s/fedora/%s/x86_64" % (repo_path, os[1]))
+        elif os[0] in {"CentOS","CentOS Linux","RedHat","Red Hat Enterprise Linux Server"}:
             packagemanager = "yum"
-            repo_path = ("%s/centos/%s/x86_64" % (repo_path,os[1]))
-        elif "CentOS Linux" in os[0]:
-            packagemanager = "yum"
-            repo_path = ("%s/centos/%s/x86_64" % (repo_path,os[1]))
-        elif "RedHat" in os[0]:
-            packagemanager = "yum"
-            repo_path = ("%s/redhat/%s/x86_64" % (repo_path,os[1]))
+            if os[0] in {"CentOS","CentOS Linux"}:
+                repo_path = ("%s/centos/%s/x86_64" % (repo_path,os[1]))
+            else:
+                repo_path = ("%s/redhat/%s/x86_64" % (repo_path,os[1]))
         else:
             print ("Your Operatingsystem is not supported please use CentOS, RHEL or Fedora")
             sys.exit()
@@ -62,6 +61,24 @@ class RepoSync():
         else:
             sync_repos_cmd = ("reposync -p %s" % (repo_path))
             subprocess.check_output(sync_repos_cmd, shell=True)
+
+    # install required packages
+    def check_installed_packages(self):
+        yb = yum.YumBase()
+        prereqs = ["PyYAML","rsync"]
+        for package in prereqs:
+            print "Checking for required package: %s" % (package)
+            res = yb.rpmdb.searchNevra(name=package)
+            if res:
+                for pkg in res:
+                    print pkg, "installed"
+            else:
+                try:
+                    print "trying to install missing package: %s" % (package)
+                    yb.install(name=package)
+                except:
+                    print >> sys.stderr, "Failed during install of %s package!" % (package)
+                    sys.exit(1)
 
 
 if __name__ == "__main__":
