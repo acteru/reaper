@@ -143,7 +143,7 @@ class config_load:
         os = platform.linux_distribution()
         if "Fedora" in os[0]:
             packagemanager = "dnf"
-        elif os[0] in "CentOS" or "CentOS Linux" or "RedHat" or "Red Hat Enterprise Linux Server":
+        elif os[0] in {"CentOS","CentOS Linux","RedHat","Red Hat Enterprise Linux Server"}:
             packagemanager = "yum"
         else:
             print ("Your Operatingsystem is not supported please use CentOS, RHEL or Fedora")
