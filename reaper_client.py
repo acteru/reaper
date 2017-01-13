@@ -34,9 +34,9 @@ class RepoSync():
         if "Fedora" in os[0]:
             packagemanager = "dnf"
             repo_path = ("%s/fedora/%s/x86_64" % (repo_path, os[1]))
-        elif os[0] in "CentOS" or "CentOS Linux" or "RedHat" or "Red Hat Enterprise Linux Server":
+        elif os[0] in {"CentOS","CentOS Linux","RedHat","Red Hat Enterprise Linux Server"}:
             packagemanager = "yum"
-            if os[0] in "CentOS" or "CentOS Linux":
+            if os[0] in {"CentOS","CentOS Linux"}:
                 repo_path = ("%s/centos/%s/x86_64" % (repo_path,os[1]))
             else:
                 repo_path = ("%s/redhat/%s/x86_64" % (repo_path,os[1]))
