@@ -1,3 +1,5 @@
 .idea
 .vagrant
 venv
+__pycache__
+tags

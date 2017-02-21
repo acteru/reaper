@@ -1,0 +1,13 @@
+# log configuration
+logfile_path: '/var/log/reaper/reaper.log'
+loglevel_console: 'logging.ERROR'
+loglevel_file: 'logging.DEBUG'
+
+# reaper configuration
+reaper_master: "195.141.111.121"
+packagemanager: "yum"
+repository_data_path: "/data/repositories"
+operatingsystem: "CentOS"
+repositories:
+  - "updates"
+  - "core"
