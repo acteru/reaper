@@ -4,13 +4,14 @@ Get your needed repositories on the slave nodes and push them to your master ser
 ## Setup
 ![reaper](https://cloud.githubusercontent.com/assets/7287250/20973613/8f2722b6-bc99-11e6-9cd3-7b9ca90f5e9f.png)
 
-## Requirements for CentOS/Rhel 7
-
-Add epel-repo and install Python3
+## Requirements for CentOS/RHEL7
 
     yum install epel-release
-    yum install python34 python34-pip
+
+    yum install python34 python34-pip createrepo rsync  
+
     pip3 install --upgrade pip
+
     pip3 install PyYAML
 
 Make sure that ssh-keys are already exchanged between master and slave.
