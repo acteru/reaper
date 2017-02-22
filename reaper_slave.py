@@ -20,7 +20,7 @@ class Config():
                 self.repositories = config["repositories"]
                 self.repository_data_path = config["repository_data_path"]
                 self.reaper_master = config["reaper_master"]
-                self.os_major_v = config["osmajorversion"]
+                self.os_major_v = config["os_major_version"]
                 self.remote_user = config["remote_user"]
             except:
                 print(yaml.YAMLError)
@@ -32,7 +32,7 @@ class Repositories():
         """get all packages from the upstream repositories"""
         s_cnf = Config()
         for repo in s_cnf.repositories:
-            cmd = "reposync -p {1} -r {2}".format(s_cnf.repository_data_path, repo)
+            cmd = "reposync -p {0} -r {1}".format(s_cnf.repository_data_path, repo)
             print(cmd)
             subprocess.check_output(cmd, shell=True)
 

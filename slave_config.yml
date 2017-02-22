@@ -7,9 +7,9 @@ loglevel_file: 'logging.DEBUG'
 reaper_master: "reaper-master.example.com"
 remote_user: "root"
 packagemanager: "yum"
-repository_data_path: "/var/repositories"
+repository_data_path: "/var/repos"
 operatingsystem: "CentOS"
-osmajorversion: 7
+os_major_version: 7
 repositories:
   - "base"
   - "epel"
