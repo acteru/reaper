@@ -51,16 +51,21 @@ class Repositories():
         subprocess.check_output(cmd, shell=True)
 
 if __name__ == "__main__":
-
+    
     parser = argparse.ArgumentParser(description='trigger reaper functions')
     parser.add_argument('-s', '--sync', action='store_true', help="get upstream repositories")
     parser.add_argument('-m', '--meta', action='store_true', help="create metadata for repositories")
     parser.add_argument('-p', '--push', action='store_true', help="push repositories to master")
+    parser.add_argument('-a', '--all', action='store_true', help="start all task's in this order sync->meta->push")
     args = vars(parser.parse_args())
     r = Repositories()
     if args['sync'] == True:
         r.get_upstream_packages()
-    elif args['push'] == True:
-        r.push_to_master()
     elif args['meta'] == True:
         r.create_metadata()
+    elif args['push'] == True:
+        r.push_to_master()
+    elif args['all'] == True:
+        r.get_upstream_packages()
+        r.create_metadata()
+        r.push_to_master()
