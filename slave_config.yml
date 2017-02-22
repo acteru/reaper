@@ -3,11 +3,13 @@ logfile_path: '/var/log/reaper/reaper.log'
 loglevel_console: 'logging.ERROR'
 loglevel_file: 'logging.DEBUG'
 
-# reaper configuration
-reaper_master: "195.141.111.121"
+# reaper_slave configuration
+reaper_master: "reaper-master.example.com"
+remote_user: "root"
 packagemanager: "yum"
-repository_data_path: "/data/repositories"
+repository_data_path: "/var/repositories"
 operatingsystem: "CentOS"
+osmajorversion: 7
 repositories:
-  - "updates"
-  - "core"
+  - "base"
+  - "epel"
