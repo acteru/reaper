@@ -9,7 +9,7 @@ import yaml
 class Config():
     """Loads yaml configuration file and deserialize the config"""
     def __init__(self):
-        with open('slave_config.yml', 'r') as config_load:
+        with open('config.yml', 'r') as config_load:
             try:
                 config = yaml.load(config_load)
                 self.logfile_path = config["logfile_path"]
@@ -17,10 +17,10 @@ class Config():
                 self.loglevel_file = config["loglevel_file"]
                 self.packagemanager = config["packagemanager"]
                 self.os = config["operatingsystem"]
+                self.os_major_v = config["os_major_version"]
                 self.repositories = config["repositories"]
                 self.repository_data_path = config["repository_data_path"]
                 self.reaper_master = config["reaper_master"]
-                self.os_major_v = config["os_major_version"]
                 self.remote_user = config["remote_user"]
             except:
                 print(yaml.YAMLError)
@@ -33,7 +33,13 @@ class Repositories():
         s_cnf = Config()
         for repo in s_cnf.repositories:
             cmd = "reposync -p {0} -r {1}".format(s_cnf.repository_data_path, repo)
-            print(cmd)
+            subprocess.check_output(cmd, shell=True)
+
+    def create_metadata(self):
+        """create metadata for repository"""
+        s_cnf = Config()
+        for repo in s_cnf.repositories:
+            cmd = "createrepo {0}/{1}".format(s_cnf.repository_data_path, repo)
             subprocess.check_output(cmd, shell=True)
 
     def push_to_master(self):
@@ -41,22 +47,20 @@ class Repositories():
         s_cnf = Config()
         cmd_folder = "ssh {0}@{1} 'mkdir -p /var/repo/latest/{2}/{3}'".format(s_cnf.remote_user, s_cnf.reaper_master, s_cnf.os, s_cnf.os_major_v)
         cmd = "rsync -a {0} {1}:/var/repo/latest/{2}/{3}".format(s_cnf.repository_data_path, s_cnf.reaper_master, s_cnf.os, s_cnf.os_major_v)
-        print(cmd)
         subprocess.check_output(cmd_folder, shell=True)
         subprocess.check_output(cmd, shell=True)
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='trigger reaper functions')
-    parser.add_argument('-x', '--sync', action='store_true', help="get upstream repositories")
+    parser.add_argument('-s', '--sync', action='store_true', help="get upstream repositories")
+    parser.add_argument('-m', '--meta', action='store_true', help="create metadata for repositories")
     parser.add_argument('-p', '--push', action='store_true', help="push repositories to master")
     args = vars(parser.parse_args())
-    if len(args) == 1:
-        parser.print_help()
-        sys.exit(1)
-    elif args['sync'] == True:
-        r = Repositories()
+    r = Repositories()
+    if args['sync'] == True:
         r.get_upstream_packages()
     elif args['push'] == True:
-        r = Repositories()
         r.push_to_master()
+    elif args['meta'] == True:
+        r.create_metadata()
