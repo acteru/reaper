@@ -39,8 +39,8 @@ class Repositories():
     def push_to_master(self):
         """Create folders on master and push new Packages to the reaper master"""
         s_cnf = Config()
-        cmd_folder = "ssh {0}@{1} 'mkdir -p /var/repo/{2}/{3}'".format(s_cnf.remote_user, s_cnf.reaper_master, s_cnf.os, s_cnf.os_major_v)
-        cmd = "rsync -a {0} {1}:/var/repo/{2}/{3}".format(s_cnf.repository_data_path, s_cnf.reaper_master, s_cnf.os, s_cnf.os_major_v)
+        cmd_folder = "ssh {0}@{1} 'mkdir -p /var/repo/latest/{2}/{3}'".format(s_cnf.remote_user, s_cnf.reaper_master, s_cnf.os, s_cnf.os_major_v)
+        cmd = "rsync -a {0} {1}:/var/repo/latest/{2}/{3}".format(s_cnf.repository_data_path, s_cnf.reaper_master, s_cnf.os, s_cnf.os_major_v)
         print(cmd)
         subprocess.check_output(cmd_folder, shell=True)
         subprocess.check_output(cmd, shell=True)
