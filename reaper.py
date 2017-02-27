@@ -9,7 +9,7 @@ import yaml
 class Config():
     """Loads yaml configuration file and deserialize the config"""
     def __init__(self):
-        with open('config.yml', 'r') as config_load:
+        with open('config.yaml', 'r') as config_load:
             try:
                 config = yaml.load(config_load)
                 self.logfile_path = config["logfile_path"]
@@ -45,13 +45,13 @@ class Repositories():
     def push_to_master(self):
         """Create folders on master and push new Packages to the reaper master"""
         s_cnf = Config()
-        cmd_folder = "ssh {0}@{1} 'mkdir -p /var/repo/latest/{2}/{3}'".format(s_cnf.remote_user, s_cnf.reaper_master, s_cnf.os, s_cnf.os_major_v)
-        cmd = "rsync -a {0} {1}:/var/repo/latest/{2}/{3}/".format(s_cnf.repository_data_path, s_cnf.reaper_master, s_cnf.os, s_cnf.os_major_v)
+        cmd_folder = "ssh {0}@{1} 'mkdir -p /srv/latest/{2}/{3}'".format(s_cnf.remote_user, s_cnf.reaper_master, s_cnf.os, s_cnf.os_major_v)
+        cmd = "rsync -a {0} {1}:/srv/latest/{2}/{3}/".format(s_cnf.repository_data_path, s_cnf.reaper_master, s_cnf.os, s_cnf.os_major_v)
         subprocess.check_output(cmd_folder, shell=True)
         subprocess.check_output(cmd, shell=True)
 
 if __name__ == "__main__":
-    
+
     parser = argparse.ArgumentParser(description='trigger reaper functions')
     parser.add_argument('-s', '--sync', action='store_true', help="get upstream repositories")
     parser.add_argument('-m', '--meta', action='store_true', help="create metadata for repositories")
