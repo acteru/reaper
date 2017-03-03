@@ -34,13 +34,11 @@ class RepositorieRelease():
         return print("snapshot: {0} of {1} has successfully been created".format(self.snapshot_name, self.lv_origin))
 
 
-
     def create_mountpoint(self):
         """Create mountpoint for the new snapshot"""
-        mount_cmd = "mkdir -p {0}".format(self.mount_path)
-        print(mount_cmd)
-        #subprocess.check_output(mount_cmd, shell=True)
-        return print("mountpoint {0} has successfuly been created".format(self.mount_path))
+        if not os.path.exists(self.mount_path):
+            os.makedirs(self.mount_path)
+            return print("mountpoint {0} has successfuly been created".format(self.mount_path))
 
         
     def mount_snapshot(self):
