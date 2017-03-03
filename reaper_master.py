@@ -14,15 +14,16 @@ import sys
 
 class RepositorieRelease():
     """Create new releases for Repositories"""
-    def __init__(self, release_name, vg_origin, lv_origin, lv_name, lv_size, repo_path):
+    def __init__(self, release_name, vg_origin, lv_origin, lv_name, lv_size, repo_path, document_root):
         self.date_today = datetime.date.today()
-        self.release_name = release_name
-        self.repo_path = repo_path
-        self.vg_origin = vg_origin
-        self.lv_origin = lv_origin
-        self.lv_name = lv_name
-        self.lv_size = lv_size
-        self.mount_path = "{0}/{1}".format(self.repo_path, self.release_name)
+        self.release_name = release_name                                      # stable or new_release for path: /srv/stable
+        self.repo_path = repo_path                                            # default: /srv location to repositories 
+        self.document_root = document_root                                    # apache document_root
+        self.vg_origin = vg_origin                                            # main vg for repositories
+        self.lv_origin = lv_origin                                            # origin lv on main vg
+        self.lv_name = lv_name                                                # name for snapshot
+        self.lv_size = lv_size                                                # size for snapshot
+        self.mount_path = "{0}/{1}".format(self.repo_path, self.release_name) # bsp. '/srv/stable'
         self.snapshot_name = "release--{0}-{1}".format(self.date_today, self.lv_name)
 
     def create_repo_snapshot(self):
@@ -32,25 +33,44 @@ class RepositorieRelease():
         #subprocess.check_output(create_snapshot, shell=True)
         return print("snapshot: {0} of {1} has successfully been created".format(self.snapshot_name, self.lv_origin))
 
+
+
     def create_mountpoint(self):
         """Create mountpoint for the new snapshot"""
         mount_cmd = "mkdir -p {0}".format(self.mount_path)
         print(mount_cmd)
         #subprocess.check_output(mount_cmd, shell=True)
         return print("mountpoint {0} has successfuly been created".format(self.mount_path))
+
         
     def mount_snapshot(self):
         """Mount new made snapshot on mountpoint"""
-        mount_path = "/srv/{0}".format(self.release_name)
+        mount_path = "{0}/{1}".format(self.repo_path, self.release_name)
         mount_cmd = "mount /dev/{0}/release-{1}-{2} {3}".format(self.vg_origin, self.date_today, self.lv_name, mount_path)
-        print(mount_cmd)
-        #subprocess.check_output(mount_cmd, shell=True)
+        subprocess.check_output(mount_cmd, shell=True)
+
         
-    def create_symlink(self):
+    def check_symlink(self):
         """Create symlink to webserver docroot"""
-        symlink_cmd = "ln -s {0}".format(self.mount_path)
-        print(symlink_cmd)
-        #subprocess.check_output(symlink_cmd, shell=True)
+        src = self.mount_path
+        dst = self.document_root + "/" + self.release_name
+        if os.path.islink(dst) == True:
+            print("symlink for release alrady exists")
+        else:
+            os.symlink(src, dst)
+            print("new symlink to {0} created".format(dst))
+
+
+
+    def check_mount(self):
+        """Check if other snapshot is already mounted"""
+        check_if_mounted = "grep -qs '{0}' /proc/mounts".format(self.mount_path)
+        if subprocess.call(check_if_mounted) == 0:
+            subprocess.check_output("umount {0}".format(self.mount_path))
+            mount_snapshot()
+        else:
+            mount_snapshot()
+
 
     def get_snapshot_list(self):
         """List all lv snapshots on the system"""
@@ -65,9 +85,10 @@ if __name__ == "__main__":
         sys.exit('Script must be run as root')
     
     #TODO create argsparser / configuration file for data" 
-    r = RepositorieRelease("stable", "repo-data", "/dev/repo-data/repo01", "stabel", "10G", "/srv")
+    r = RepositorieRelease("stable", "repo-data", "/dev/repo-data/repo01", "stabel", "10G", "/srv", "/var/www/html")
     r.create_repo_snapshot()
     r.create_mountpoint()
-    r.mount_snapshot()
-    r.create_symlink()
+    #r.mount_snapshot()
+    r.check_symlink()
     r.get_snapshot_list()
+    #r.check_and_mount()
