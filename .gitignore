@@ -1,5 +1,6 @@
 .idea
 .vagrant
+.swp
 venv
 __pycache__
 tags
