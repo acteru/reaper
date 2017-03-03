@@ -24,7 +24,7 @@ class RepositorieRelease():
         self.lv_name = lv_name                                                # name for snapshot
         self.lv_size = lv_size                                                # size for snapshot
         self.mount_path = "{0}/{1}".format(self.repo_path, self.release_name) # bsp. '/srv/stable'
-        self.snapshot_name = "release--{0}-{1}".format(self.date_today, self.lv_name)
+        self.snapshot_name = "release-{0}-{1}".format(self.date_today, self.lv_name) # "release-date-snapshot_name
 
     def create_repo_snapshot(self):
         """Create snapshot of a logical volume"""
@@ -59,7 +59,6 @@ class RepositorieRelease():
         else:
             os.symlink(src, dst)
             print("new symlink to {0} created".format(dst))
-
 
 
     def check_mount(self):
