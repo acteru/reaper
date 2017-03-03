@@ -34,11 +34,13 @@ class RepositorieRelease():
         return print("snapshot: {0} of {1} has successfully been created".format(self.snapshot_name, self.lv_origin))
 
 
+
     def create_mountpoint(self):
         """Create mountpoint for the new snapshot"""
         if not os.path.exists(self.mount_path):
             os.makedirs(self.mount_path)
             return print("mountpoint {0} has successfuly been created".format(self.mount_path))
+
 
         
     def mount_snapshot(self):
@@ -46,6 +48,7 @@ class RepositorieRelease():
         mount_path = "{0}/{1}".format(self.repo_path, self.release_name)
         mount_cmd = "mount /dev/{0}/release-{1}-{2} {3}".format(self.vg_origin, self.date_today, self.lv_name, mount_path)
         subprocess.check_output(mount_cmd, shell=True)
+
 
         
     def check_symlink(self):
@@ -57,6 +60,7 @@ class RepositorieRelease():
         else:
             os.symlink(src, dst)
             print("new symlink to {0} created".format(dst))
+
 
 
     def check_mount(self):
@@ -75,6 +79,7 @@ class RepositorieRelease():
         subprocess.check_output(get_snapshot_cmd, shell=True)
 
 
+
 if __name__ == "__main__":
 
     if not os.getuid() == 0:
@@ -82,7 +87,7 @@ if __name__ == "__main__":
         sys.exit('Script must be run as root')
     
     #TODO create argsparser / configuration file for data" 
-    r = RepositorieRelease("stable", "repo-data", "/dev/repo-data/repo01", "stabel", "10G", "/srv", "/var/www/html")
+    r = RepositorieRelease("stable", "repo-data", "/dev/repo-data/repo01", "stable", "10G", "/srv", "/var/www/html")
     r.create_repo_snapshot()
     r.create_mountpoint()
     #r.mount_snapshot()
