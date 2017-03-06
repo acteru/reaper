@@ -66,11 +66,11 @@ class RepositorieRelease():
     def check_mount(self):
         """Check if other snapshot is already mounted"""
         check_if_mounted = "grep -qs '{0}' /proc/mounts".format(self.mount_path)
-        if subprocess.call(check_if_mounted) == 0:
-            subprocess.check_output("umount {0}".format(self.mount_path))
-            mount_snapshot()
+        if subprocess.call(check_if_mounted, shell=True) == 0:
+            subprocess.check_output("umount {0}".format(self.mount_path), shell=True)
+            self.mount_snapshot()
         else:
-            mount_snapshot()
+            self.mount_snapshot()
 
 
     def get_snapshot_list(self):
@@ -90,7 +90,6 @@ if __name__ == "__main__":
     r = RepositorieRelease("stable", "repo-data", "/dev/repo-data/repo01", "stable", "10G", "/srv", "/var/www/html")
     r.create_repo_snapshot()
     r.create_mountpoint()
-    #r.mount_snapshot()
     r.check_symlink()
     r.get_snapshot_list()
-    #r.check_and_mount()
+    r.check_mount()
