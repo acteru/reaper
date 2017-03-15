@@ -1,17 +1,12 @@
 # Reaper
 Get your needed repositories on the slave nodes and push them to your master server where you have the possibility to create different deployment environments.
 
-## Requirements for CentOS/RHEL7
+## Requirements for CentOS/RHEL7 & CentOS/RHEL6
 
     yum install epel-release -y
 
-    yum install python34 python34-PyYAML createrepo rsync -y
+    yum install python34 python34-PyYAML createrepo rsync git -y
 
-## Requirements for CentOS/RHEL6
-
-   yum install epel-release -y
-
-   yum install python34 python34-PyYAML createrepo rsync -y
 
 ## Usage
 
