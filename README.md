@@ -3,13 +3,15 @@ Get your needed repositories on the slave nodes and push them to your master ser
 
 ## Requirements for CentOS/RHEL7
 
-    yum install epel-release
+    yum install epel-release -y
 
-    yum install python34 python34-pip createrepo rsync
+    yum install python34 python34-PyYAML createrepo rsync -y
 
-    pip3 install --upgrade pip
+## Requirements for CentOS/RHEL6
 
-    pip3 install PyYAML
+   yum install epel-release -y
+
+   yum install python34 python34-PyYAML createrepo rsync -y
 
 ## Usage
 
