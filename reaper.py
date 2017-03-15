@@ -52,7 +52,7 @@ class Repositories():
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='trigger reaper functions')
+    parser = argparse.ArgumentParser(description='reaper client functions')
     parser.add_argument('-s', '--sync', action='store_true', help="get upstream repositories")
     parser.add_argument('-m', '--meta', action='store_true', help="create metadata for repositories")
     parser.add_argument('-p', '--push', action='store_true', help="push repositories to master")
@@ -69,3 +69,6 @@ if __name__ == "__main__":
         r.get_upstream_packages()
         r.create_metadata()
         r.push_to_master()
+    else:
+        parser.print_help()
+        sys.exit(1)
