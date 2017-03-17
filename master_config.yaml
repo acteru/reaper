@@ -1,0 +1,10 @@
+# reaper_master configuration
+# Logging Configuration
+logfile_path: '/var/log/reaper'
+loglevel_console: 'error'
+loglevel_file: 'debug' 
+
+# Master Configuration
+repo_path: "/srv"
+apache_document_root: "/var/www/html"
+vg_origin: "repo-data"

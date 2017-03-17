@@ -7,13 +7,31 @@ new releases are created with lv-snapshots
 """
 
 import datetime
+import logging
 import subprocess
 import argparse
 import yaml
 import os
 import sys
 
-class RepositorieRelease():
+
+class Config():
+    """Loads yaml configuration file and deserialize the reaper_master config"""
+    def __init__(self):
+        with open('master_config.yaml', 'r') as config_load:
+            try:
+                config = yaml.load(config_load)
+                self.logfile_path = config["logfile_path"]
+                self.loglevel_console = config["loglevel_console"]
+                self.loglevel_file = config["loglevel_file"]
+                self.repo_path = config["repo_path"]
+                self.document_root = config["apache_document_root"]
+                self.vg_origin = config["vg_origin"]
+            except:
+                print(yaml.YAMLError)
+
+
+class Repository():
     """create new releases for Repositories"""
     def __init__(self, release_name, vg_origin, lv_origin, lv_name, lv_size, repo_path, document_root):
         self.date_today = datetime.date.today()                               # get todaysdate
@@ -30,6 +48,10 @@ class RepositorieRelease():
 
     def create_repo_snapshot(self):
         """create snapshot of a logical volume"""
+        # 4 Vars
+        # lv_size
+        # lv_origin
+        # snapshot_name (combinaton date_today, lv_name)
         create_snapshot = "lvcreate -pr --snapshot -L {0} --name {1} {2}".format(self.lv_size, self.snapshot_name, self.lv_origin)
         print(create_snapshot)
         subprocess.check_output(create_snapshot, shell=True)
@@ -70,7 +92,8 @@ class RepositorieRelease():
         else:
             self.mount_snapshot()
 
-
+class cli():
+    """Cli functions"""
     def get_snapshot_list(self):
         """list all lv snapshots on the system as strings in list"""
         get_snapshot_cmd = "lvs -o lv_name,lv_attr --noheadings -S lv_attr=~[^s.*]"
@@ -79,8 +102,9 @@ class RepositorieRelease():
         snapshots = snapshots.split()
         print(snapshots[0::2])
 
-    def set_snapshot(self,snapshot_name, ):
+    def set_snapshot(self,snapshot_name):
         """mount selected snapshot in defined environment"""
+
 
 
 if __name__ == "__main__":
@@ -88,7 +112,6 @@ if __name__ == "__main__":
         """check if root user is used"""
         sys.exit('Script must be run as root')
     
-    #TODO create argsparser / configuration file for data" 
     #r = RepositorieRelease("stable", "repo-data", "/dev/repo-data/repo01", "stable", "10G", "/srv", "/var/www/html")
     #r.create_repo_snapshot()
     #r.create_mountpoint()
@@ -96,13 +119,31 @@ if __name__ == "__main__":
     #r.get_snapshot_list()
     #r.check_mount()
 
+    # get configuration vars
+    conf = Config()
+    logfile_path = conf.logfile_path + "/reaper.log"
+    # check if logfile exists
+    if not os.path.exists(logfile_path):
+        touch_cmd = "touch " + logfile_path
+        os.makedirs(conf.logfile_path)
+        subprocess.check_output(touch_cmd, shell=True)
+
+ 
+    # configure logging
+    logging.basicConfig(filename=logfile_path, level=conf.loglevel_file.upper(), format='%(asctime)s %(message)s')
+
+
     # cli for repaer master
     parser = argparse.ArgumentParser(description='Manage Repository Snapshots')
     parser.add_argument('-s', '--snapshots', action='store_true', help="get all repository snapshots")
+    parser.add_argument('-r', '--release', action='store_true', help="create new snapshot")
     args = vars(parser.parse_args())
-    r = RepositorieRelease("stable", "repo-data", "/dev/repo-data/repo01", "stable", "10G", "/srv", "/var/www/html")
+    #r = RepositorieRelease("stable", "repo-data", "/dev/repo-data/repo01", "stable", "10G", "/srv", "/var/www/html")
     if args['snapshots'] == True:
-        r.get_snapshot_list()
+        cli = cli()
+        cli.get_snapshot_list()
+    elif args['release'] == True:
+        print("create new lv snapshot from: latest")
     else:
         parser.print_help()
         sys.exit(1)
