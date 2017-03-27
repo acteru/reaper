@@ -5,7 +5,13 @@ Get your needed repositories on the slave nodes and push them to your master ser
 
     yum install epel-release -y
 
-    yum install python34 python34-PyYAML createrepo rsync git -y
+    yum install python34 python34-PyYAML createrepo rsync -y
+
+## Requirements for reaper\_master
+
+    yum install epel-release -y
+
+    yum install python34 python34-PyYAML httpd
 
 
 ## Usage
