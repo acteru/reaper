@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-yum install httpd nginx wget epel-release createrepo -y
+yum install httpd nginx wget epel-release createrepo git -y
+# clone reaper
+git clone https://github.com/acteru/reaper.git /opt/reaper
 # create folders
-mkdir -p /srv/latest
-mkdir -p /srv/stable
+mkdir -p /srv/reaper/latest
+mkdir -p /srv/reaper/releases
 # start webserver
 systemctl start httpd

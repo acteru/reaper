@@ -2,7 +2,10 @@
 
 """
 Manage repository releases - on master reposerver
-new releases are created with lv-snapshots
+
+reaper makes use of logicalvolumes to create snapshots of repositories and create
+so called "releases". After creating a new release you can link it to your 
+webserver where your repositories can be distributed.
 
 """
 
@@ -50,8 +53,9 @@ class RepositoryRelease():
         self.snapshot_name = "release-{0}".format(self.date_today)
         self.snapshot_full_path = self.snapshot_path + self.snapshot_name
         self.snapshot_lv_path = "/dev/{0}/{1}".format(
-        volumegroup,
-        self.snapshot_name)
+            volumegroup,
+            self.snapshot_name
+        )
 
     def check_snapshot(self):
         """check if snapshot already exists"""
@@ -70,15 +74,16 @@ class RepositoryRelease():
         self.logicalvolume)
         print(create_snapshot)
         subprocess.check_output(create_snapshot, shell=True)
-        print("snapshot: {0} of {1} has successfully been created".format(self.snapshot_name, self.logicalvolume))
-
+        print("snapshot: {0} of {1} has successfully been created".format(
+            self.snapshot_name,
+            self.logicalvolume)
+        )
 
     def create_repo_mountpoint(self):
         """create folder for snapshot"""
         if not os.path.exists(self.snapshot_full_path):
             os.makedirs(self.snapshot_full_path)
             print("mountpoint for {0} has successfully been created".format(self.snapshot_full_path))
-
 
     def mount_repo_snapshot(self):
         """mount new made snapshot on mountpoint"""
@@ -88,7 +93,6 @@ class RepositoryRelease():
         self.snapshot_full_path)
         subprocess.check_output(mount_cmd, shell=True)
         print("{0} is mounted".format(self.snapshot_full_path))
-
 
     def create_fstab_entry(self):
         """create fstab entry for release"""
@@ -102,9 +106,15 @@ class RepositoryRelease():
         subprocess.check_output(unmount_cmd, shell=True)
         subprocess.check_output(lvremove_cmd, shell=True)
         os.rmdir(snapshot_mount_path)
+
+    def set_snapshot(self, snapshot_name, instance_name):
+        """set specifical release to instance"""
+        src = "/srv/reaper/releases/{0}".format(snapshot_name)
+        dst = conf.document_root + "/" + instance_name
+        os.symlink(src, dst)
  
 class cli():
-    """Cli functions"""
+    """extended cli function call"""
     def get_snapshot_list(self):
         """list all lv snapshots on the system as strings in list"""
         get_snapshot_cmd = "lvs -o lv_name,lv_attr --noheadings -S lv_attr=~[^s.*]"
@@ -113,58 +123,94 @@ class cli():
         snapshots = snapshots.split()
         print(snapshots)
 
-    def set_snapshot(self):
-        """mount selected snapshot in defined environment"""
-        snapshot_list = cli.get_snapshot_list()
-        print("choose one snapshot for the list:")
-
-
 if __name__ == "__main__":
     if not os.getuid() == 0:
         """check if root user is used"""
         sys.exit('Script must be run as root')
-    
-    # get configuration vars
+
+    ## create needed folders ##
+    folder_list = ["/srv/reaper", "/srv/reaper/latest", "/srv/reaper/releases"]
+    for folder in folder_list:
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
+    ## load configuration ##
     conf = Config()
     logfile_path = conf.logfile_path + "/reaper.log"
-    # check if logfile exists
     if not os.path.exists(logfile_path):
         touch_cmd = "touch " + logfile_path
         os.makedirs(conf.logfile_path)
         subprocess.check_output(touch_cmd, shell=True)
 
-    # configure logging 
-    logging.basicConfig(filename=logfile_path, level=conf.loglevel_file.upper(), format='%(asctime)s %(message)s')
+    ## configure logging ##
+    logging.basicConfig(
+        filename=logfile_path,
+        level=conf.loglevel_file.upper(),
+        format='%(asctime)s %(message)s'
+    )
+
+    ## create args parser ##
+    parser = argparse.ArgumentParser(
+        description='Manages repository releases',
+        epilog="Example of use:" \
+            "--setsnapshot release-2017-03-27 development" \
+    )
+    parser.add_argument(
+        '-s',
+        '--snapshots',
+         action='store_true',
+         help="list all repository snapshots on the system"
+    )
+    parser.add_argument(
+        '-x',
+        '--setsnapshot',
+        action='store_true',
+        help="set softlink from document root to a release"
+    )
+    parser.add_argument(
+        '-r',
+        '--release',
+        action='store_true',
+        help="create new release: creates snapshot and mount in /srv/reaper/releases/release-<date>"
+    )
+    parser.add_argument(
+        "snapshotname",
+        nargs='?',
+        type=str,
+        help="snapshot name"
+    )
+    parser.add_argument(
+        "instancename",
+        nargs='?',
+        type=str,
+        help="instance name"
+    )
+    parser.add_argument(
+        '-d',
+        '--deleterelease',
+         action='store_true',
+        help="remove specific release: unmount,remove snapshot, remove mountpoint"
+    )
  
-    # cli for repaer master
-    parser = argparse.ArgumentParser(description='Manage Repository Snapshots')
-    parser.add_argument('-s', '--snapshots', action='store_true', help="get all repository snapshots")
-    parser.add_argument('-r', '--release', action='store_true', help="create new snapshot")
-    parser.add_argument('-m', '--mountrelease', action='store_true', help="mount repo snapshot")
-    parser.add_argument("snapshotname", nargs='?', type=str, help="snapshot name")
-    parser.add_argument('-d', '--deleterelease', action='store_true', help="remove snapshot")
     args = vars(parser.parse_args())
-    print(args)
+    r = RepositoryRelease(
+        conf.volumegroup,
+        conf.logicalvolume,
+    )
+
+    ## validate user input to args parser ##
     if args['snapshots'] == True:
         cli = cli()
         cli.get_snapshot_list()
+    elif args['setsnapshot'] == True and args['snapshotname'] and args['instancename']:
+        r.set_snapshot(args['snapshotname'],args['instancename'])
     elif args['release'] == True:
-        r = RepositoryRelease(
-            conf.volumegroup,
-            conf.logicalvolume,
-        )
         r.check_snapshot()
         r.create_repo_snapshot()
         r.create_repo_mountpoint()
         r.mount_repo_snapshot()
     elif args['deleterelease'] == True and args['snapshotname']:
-        r = RepositoryRelease(
-           conf.volumegroup,
-           conf.logicalvolume
-        )
         r.remove_release(args['snapshotname'])
-    elif args['mountrelease'] == True:
-        print("select mountpoint")
     else:
         parser.print_help()
         sys.exit(1)

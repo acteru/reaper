@@ -1,41 +1,50 @@
 # Reaper
-Get your needed repositories on the slave nodes and push them to your master server where you have the possibility to create different deployment environments.
+Get your needed repositories on the slave nodes and push them to your master server where you have the possibility to create auto lvsnapshots of your repositories. This snapshots are called releases and the can be linked to variouse instances like: test, integration, production.  Distribute them with a webserver of your choise and add your repositories to your target servers. In the examples the apache server is used but feel free to use something else just add the document\_root path to the configuration file.
 
-## Requirements for CentOS/RHEL7 & CentOS/RHEL6
+## Requirements for CentOS/RHEL7
 
-    yum install epel-release -y
+    yum install epel-release
 
-    yum install python34 python34-PyYAML createrepo rsync -y
+    yum install python34 python34-pip createrepo rsync
 
-## Requirements for reaper\_master
+    pip3 install --upgrade pip
 
-    yum install epel-release -y
+    pip3 install PyYAML
 
-    yum install python34 python34-PyYAML httpd
+## How to install reaper client
+For example: setup a CentOS 7 Server and make sure that your needed repositories are attached to your server, this is also working for RedHat Enterprice Linux assuming you have the required subscriptions.
 
+    sudo git clone https://github.com/acteru/reaper.git /opt/reaper
 
-## Usage
+    mkdir -p /srv/reaper/repo
+
+    vi /opt/reaper/config.yaml
+
+    ssh-keygen
+
+    ssh-copy-id root@reaper-master.example.com
+
+## How to install reaper master
+This is just an example to explain how it could work, you have the option to configure your own volumegroup and logicalvolume in the configuration file.
 
     git clone https://github.com/acteru/reaper.git /opt/reaper
 
-    vim /opt/reaper/config.yaml (edit - add your needs)
+    pvcreate /dev/vdb
 
-    ./reaper.py --help
-    usage: reaper.py [-h] [-s] [-m] [-p] [-a]
+    vgcreate repo-data /dev/vdb
 
-    trigger reaper functions
+    lvcreate -n repo01 -L 500G repo-data
 
-    optional arguments:
-    -h, --help  show this help message and exit
-    -s, --sync  get upstream repositories
-    -m, --meta  create metadata for repositories
-    -p, --push  push repositories to master
-    -a, --all   start all task's in this order sync->meta->push
+    mkfs.ext4 /dev/repo-data/repo01
+
+    vi /opt/reaper/master_config.yaml
+
+    configure your own: volumegroup and logicalvolume
+
 
 ## Server configuration
 Ansible playbooks coming soon
 
 
 ## Management on Master
-
-Make sure that ssh-keys are already exchanged between master and slave.
+Make sure that ssh-keys are already exchanged between master and slave. It is important to use lvm because reaper uses lvm snapshots to provide new releases of your repositories.
