@@ -22,6 +22,10 @@ class Config():
                 self.repository_data_path = config["repository_data_path"]
                 self.reaper_master = config["reaper_master"]
                 self.remote_user = config["remote_user"]
+                self.localhost_repository_data_path = "/srv/reaper/latest/{0}/{1}/".format(
+                    self.os,
+                    self.os_major_v
+                )
             except:
                 print(yaml.YAMLError)
 
@@ -30,39 +34,60 @@ class Repositories():
     and pushing< repositories to reaper master """
     def get_upstream_packages(self):
         """Get all packages from the upstream repositories"""
-        s_cnf = Config()
-
-        for repo in s_cnf.repositories:
-            cmd = "reposync -p {0} -r {1}".format(s_cnf.repository_data_path, repo)
-            subprocess.check_output(cmd, shell=True)
+        if conf.reaper_master == "localhost" or "127.0.0.1":
+            for reponame in conf.repositories:
+                cmd_folder = "mkdir -p {0}".format(
+                    self.localhost_repository_data_path
+                )
+                cmd = "reposync -p {0} -r {1}".format(
+                    self.localhost_repository_data_path,
+                    reponame
+                )
+                subprocess.check_output(cmd_folder, shell=True)
+                subprocess.check_output(cmd, shell=True)
+        else:
+            for repo in conf.repositories:
+                cmd = "reposync -p {0} -r {1}".format(
+                    conf.repository_data_path,
+                    repo
+                )
+                subprocess.check_output(cmd, shell=True)
 
     def create_metadata(self):
         """Create metadata for repository"""
-        s_cnf = Config()
+        if conf.reaper_master == "localhost" or "127.0.0.1":
+            repository_path = conf.localhost_repository_data_path
+        else:
+            repository_path = conf.repository_data_path
 
-        for repo in s_cnf.repositories:
-            cmd = "createrepo {0}/{1}".format(s_cnf.repository_data_path, repo)
-            subprocess.check_output(cmd, shell=True)
+        for reponame in conf.repositories:
+                cmd = "createrepo {0}/{1}".format(
+                    repository_path,
+                    reponame
+                )
+                subprocess.check_output(cmd, shell=True)
 
     def push_to_master(self):
         """Create folders on master and push new packages to the reaper master"""
-        s_cnf = Config()
-
-        cmd_folder = "ssh {0}@{1} 'mkdir -p /srv/reaper/latest/{2}/{3}'".format(
-            s_cnf.remote_user,
-            s_cnf.reaper_master,
-            s_cnf.os, s_cnf.os_major_v
-        )
-        cmd = "rsync -a {0} {1}:/srv/reaper/latest/{2}/{3}/".format(
-            s_cnf.repository_data_path,
-            s_cnf.reaper_master,
-            s_cnf.os,
-            s_cnf.os_major_v
-        )
+        if conf.reaper_master == "localhost" or "127.0.0.1":
+            print("push to master is not needed because the reaper_master is: localhost")
+        else:
+            cmd_folder = "ssh {0}@{1} 'mkdir -p {2}'".format(
+                conf.remote_user,
+                conf.reaper_master,
+                conf.localhost_repository_data_path
+            )
+            cmd = "rsync -a {0} {1}:{2}".format(
+                conf.repository_data_path,
+                conf.reaper_master,
+                conf.localhost_repository_data_path
+            )
         subprocess.check_output(cmd_folder, shell=True)
         subprocess.check_output(cmd, shell=True)
 
 if __name__ == "__main__":
+
+    conf = Config()
 
     parser = argparse.ArgumentParser(description='reaper client functions')
     parser.add_argument(
