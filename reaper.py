@@ -4,6 +4,7 @@ import logging
 import subprocess
 import sys
 import argparse
+import os
 import yaml
 
 class Config():
@@ -87,8 +88,8 @@ class Repositories():
 
 if __name__ == "__main__":
 
+    os.chdir("/opt/reaper/")
     conf = Config()
-
     parser = argparse.ArgumentParser(description='reaper client functions')
     parser.add_argument(
         '-s',
