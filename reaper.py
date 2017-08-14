@@ -7,66 +7,56 @@ import argparse
 import os
 import yaml
 
-class Config():
-    """Loads yaml configuration file and deserialize the config"""
-    def __init__(self):
-        with open('./config.yaml', 'r') as config_load:
-            try:
-                config = yaml.load(config_load)
-                self.logfile_path = config["logfile_path"]
-                self.loglevel_console = config["loglevel_console"]
-                self.loglevel_file = config["loglevel_file"]
-                self.packagemanager = config["packagemanager"]
-                self.os = config["operatingsystem"]
-                self.os_major_v = config["os_major_version"]
-                self.repositories = config["repositories"]
-                self.repository_data_path = config["repository_data_path"]
-                self.reaper_master = config["reaper_master"]
-                self.remote_user = config["remote_user"]
-                self.localhost_repository_data_path = "/srv/reaper/latest/{0}/{1}/".format(
-                    self.os,
-                    self.os_major_v
-                )
-            except:
-                print(yaml.YAMLError)
+def config():
+    """ return configuration from yaml """
 
-class Repositories():
-    """ Used to get new packages from upstream repositories
-    and pushing< repositories to reaper master """
-    def get_upstream_packages(self):
-        """Get all packages from the upstream repositories"""
-        if conf.reaper_master == "localhost" or "127.0.0.1":
-            for reponame in conf.repositories:
-                cmd_folder = "mkdir -p {0}".format(
-                    self.localhost_repository_data_path
-                )
-                cmd = "reposync -p {0} -r {1}".format(
-                    self.localhost_repository_data_path,
-                    reponame
-                )
-                subprocess.check_output(cmd_folder, shell=True)
-                subprocess.check_output(cmd, shell=True)
-        else:
-            for repo in conf.repositories:
-                cmd = "reposync -p {0} -r {1}".format(
-                    conf.repository_data_path,
-                    repo
-                )
-                subprocess.check_output(cmd, shell=True)
+    with open('./config.yaml', 'r') as config_load:
+        try:
+            config = yaml.load(config_load)
+            return config
+        except:
+            print(yaml.YAMLError)
 
-    def create_metadata(self):
-        """Create metadata for repository"""
+
+def get_upstream_packages():
+    """create folder for repo and sync packages"""
+
+    repositories = config["repositories"]
+    localhost_repository_data_path = config["localhost_repository_data_path"]
+    reaper_master = config["reaper_master"]
+
+    if reaper_master == ("localhost" or "127.0.0.1"):
+        for reponame in repositories:
+            cmd_folder = "mkdir -p {0}".format(localhost_repository_data_path)
+            cmd = "reposync -p {0} -r {1}".format(localhost_repository_data_path,reponame)
+            subprocess.check_output(cmd_folder, shell=True)
+            subprocess.check_output(cmd, shell=True)
+    else:
+        for reponame in repositories:
+            cmd = "reposync -p {0} -r {1}".format(localhost_repository_data_path,reponame)
+            subprocess.check_output(cmd, shell=True)
+
+def create_metadata():
+    """create meta data for repositories"""
+
+    reaper_master = config["reaper_master"]
+
+    if reaper_master == ("localhost" or "127.0.0.1"):
+        repository_path = localhost_repository_data_path
+    else:
+        repository_path = repository_data_path
+
+
+def create_metadata(self):
+        """create metadata for repository"""
         if conf.reaper_master == "localhost" or "127.0.0.1":
             repository_path = conf.localhost_repository_data_path
         else:
             repository_path = conf.repository_data_path
 
-        for reponame in conf.repositories:
-                cmd = "createrepo {0}/{1}".format(
-                    repository_path,
-                    reponame
-                )
-                subprocess.check_output(cmd, shell=True)
+
+def push_to_master():
+    """create folders on master and push new packages to reaper master"""
 
     def push_to_master(self):
         """Create folders on master and push new packages to the reaper master"""
@@ -130,3 +120,33 @@ if __name__ == "__main__":
     else:
         parser.print_help()
         sys.exit(1)
+
+
+
+
+
+
+
+"""
+class Config():
+    def __init__(self):
+        with open('./config.yaml', 'r') as config_load:
+            try:
+                config = yaml.load(config_load)
+                self.logfile_path = config["logfile_path"]
+                self.loglevel_console = config["loglevel_console"]
+                self.loglevel_file = config["loglevel_file"]
+                self.packagemanager = config["packagemanager"]
+                self.os = config["operatingsystem"]
+                self.os_major_v = config["os_major_version"]
+                self.repositories = config["repositories"]
+                self.repository_data_path = config["repository_data_path"]
+                self.reaper_master = config["reaper_master"]
+                self.remote_user = config["remote_user"]
+                self.localhost_repository_data_path = "/srv/reaper/latest/{0}/{1}/".format(
+                    self.os,
+                    self.os_major_v
+                )
+            except:
+                print(yaml.YAMLError)
+"""
